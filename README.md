@@ -1,6 +1,6 @@
 <div align="center">
 
-# SignalScope AI
+SIGIL
 
 **Explainable RF Signal-Analysis Workbench**
 
