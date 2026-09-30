@@ -1,0 +1,283 @@
+export type Source =
+  | "metadata"
+  | "user_supplied"
+  | "measured"
+  | "estimated"
+  | "hypothesis"
+  | "unknown";
+
+export interface Estimate {
+  name: string;
+  value: number | string | null;
+  unit: string | null;
+  source: Source;
+  confidence: number | null;
+  evidence: string[];
+  alternatives: Estimate[];
+  warnings: string[];
+}
+
+export interface RecordingMeta {
+  id: string;
+  recording_id: string;
+  sample_rate: number | null;
+  center_frequency: number | null;
+  data_type: string | null;
+  iq_layout: string | null;
+  endian: string | null;
+  channel_count: number;
+  sample_width: string | null;
+  is_complex: boolean;
+  metadata_source: string | null;
+  metadata_confidence: number | null;
+  raw_metadata_json: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface Recording {
+  id: string;
+  original_filename: string;
+  file_hash: string;
+  file_size: number;
+  file_format: string;
+  uploaded_by: string;
+  status: string;
+  duration_seconds: number | null;
+  total_samples: number | null;
+  created_at: string;
+  updated_at: string;
+  metadata_entry: RecordingMeta | null;
+}
+
+export interface PreviewData {
+  samples_real: number[];
+  samples_imag: number[];
+  sample_rate: number | null;
+  total_samples: number;
+  preview_count: number;
+  stats: { peak_amplitude: number; rms_amplitude: number };
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  description: string | null;
+  recording_id: string;
+  created_by: string;
+  status: string;
+  selected_start_sample: number | null;
+  selected_end_sample: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ParameterEstimate {
+  id: string;
+  project_id: string;
+  parameter_name: string;
+  value_json: Record<string, unknown>;
+  value_type: string;
+  confidence: number | null;
+  evidence_json: Record<string, unknown> | null;
+  source: string;
+  created_at: string;
+}
+
+export interface Job {
+  id: string;
+  status: string;
+  progress_percent: number;
+  current_stage: string | null;
+  error_message: string | null;
+}
+
+export interface SpectrumProof {
+  freqs: number[];
+  power: number[];
+  peakiness: number;
+}
+
+export interface SymbolRateCandidate {
+  value: number | null;
+  unit: string | null;
+  source: Source;
+  confidence: number | null;
+  evidence: string[];
+}
+
+export interface DeinterleaveCandidate {
+  algorithm: string;
+  params: Record<string, number>;
+  validation_score: number;
+  run_length_histogram: { run_lengths: number[]; counts: number[]; max_run: number };
+  recovered_preview: string;
+}
+
+export interface DeepAnalysis {
+  sample_rate: number | null;
+  window_start_sample: number;
+  window_end_sample: number;
+  psd: { freqs_hz: number[]; psd_db: number[] };
+  waterfall: { freqs_hz: number[]; times_s: number[]; db: number[][] };
+  features: Record<string, { value: number | string | null; unit: string | null; source: Source; confidence: number | null; evidence: string[]; warnings: string[] }>;
+  modulation: {
+    label: string;
+    confidence: number | null;
+    evidence: string[];
+    alternatives: { label: string; confidence: number | null }[];
+    warnings: string[];
+    proof: Record<string, SpectrumProof>;
+  };
+  symbol_rate_hz: number | null;
+  symbol_rate_confidence: number | null;
+  symbol_rate_candidates: SymbolRateCandidate[];
+  deinterleave: {
+    best_attempt: string;
+    validation_score: number;
+    candidates: DeinterleaveCandidate[];
+  };
+  demodulation: {
+    modulation: string;
+    samples_per_symbol: number;
+    bits_per_symbol: number;
+    n_symbols: number;
+    n_bits: number;
+    constellation: number[][];
+    hard_bits_preview: string;
+    first_bytes_hex: string;
+    warnings: string[];
+  };
+  fec: {
+    fec_type: string;
+    decoded_bits_count: number;
+    path_metric: number | null;
+    corrected_symbols: number;
+    corrected_erasures: number;
+    stage_failed: string | null;
+    confidence: number | null;
+    crc_valid: boolean | null;
+    crc_detail: string;
+    first_bytes_hex: string;
+    warnings: string[];
+  };
+  correlation: { sequences: { pattern_hex: string; repeat_count: number; offsets: number[] }[] };
+}
+
+export interface DashboardStats {
+  recording_count: number;
+  project_count: number;
+  recent_recordings: Recording[];
+  recent_projects: Project[];
+  running_jobs: Job[];
+}
+
+export interface Burst {
+  start_sample: number;
+  end_sample: number;
+  start_time_s: number;
+  end_time_s: number;
+  peak_power_db: number;
+  mean_power_db: number;
+  confidence: number;
+}
+
+export interface BurstDetection {
+  bursts: Burst[];
+  stats: Record<string, {
+    name: string;
+    value: number | string | null;
+    unit: string | null;
+    source: string;
+    confidence: number | null;
+    evidence?: string[];
+    warnings?: string[];
+    alternatives?: { value: number | string | null; unit?: string | null; evidence: string[] }[];
+  }>;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  display_name: string | null;
+  role: string;
+  is_active: boolean;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  user: User;
+}
+
+export interface RawIQOptions {
+  dtype: string;
+  layout: string;
+  endian: string;
+  sample_rate_hz: number | null;
+  center_frequency_hz: number | null;
+}
+
+export interface WavOptions {
+  stereo_mode: string;
+}
+
+export interface UploadPayload {
+  file: File;
+  format: "wav" | "raw_iq" | "sigmf";
+  name?: string;
+  raw_iq_options?: RawIQOptions;
+  wav_options?: WavOptions;
+  sigmf_meta?: File;
+}
+
+export interface SDRConstellationPoint {
+  i: number;
+  q: number;
+}
+
+export interface SDRFrequencyPoint {
+  sample: number;
+  frequency: number;
+}
+
+export interface SDRWaveformPoint {
+  x: number;
+  i: number;
+  q: number;
+}
+
+export interface SDRPsdPoint {
+  freq: number;
+  psd: number;
+}
+
+export interface SDRFrame {
+  type: string;
+  frame_idx: number;
+  timestamp: number;
+  configured_modulation: string;
+  detected_modulation: string;
+  classification_correct: boolean;
+  confidence: number;
+  snr_db: number;
+  estimated_snr: number;
+  baud_rate: number;
+  estimated_baud: number;
+  cfo_hz: number;
+  sample_rate_hz: number;
+  visualization: "constellation" | "frequency";
+  constellation: SDRConstellationPoint[];
+  frequency_states: SDRFrequencyPoint[];
+  waveform: SDRWaveformPoint[];
+  psd: SDRPsdPoint[];
+  waterfall_slice?: number[];
+}
+
+export interface SDRStreamControls {
+  modulation: string;
+  snr_db: number;
+  baud_rate: number;
+  cfo_hz: number;
+  sample_rate_hz?: number;
+  fps?: number;
+}

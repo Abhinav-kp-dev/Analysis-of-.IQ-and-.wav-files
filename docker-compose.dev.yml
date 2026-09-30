@@ -1,0 +1,29 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    entrypoint: []        # the ./src bind mount shadows /app/entrypoint-api.sh; the command below covers it
+    volumes:
+      - ./services/api:/app
+      - ./services/dsp-worker:/dsp-worker
+      - uploads_data:/data
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app --reload-dir /dsp-worker"
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    entrypoint: []        # same shadowing; the command below covers it
+    volumes:
+      - ./services/api:/app
+      - ./services/dsp-worker:/dsp-worker
+      - uploads_data:/data
+    command: celery -A app.tasks worker --loglevel=info --concurrency=2
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web

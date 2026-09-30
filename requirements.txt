@@ -1,0 +1,4 @@
+-r services/api/requirements.txt
+-e services/dsp-worker
+streamlit
+plotly
