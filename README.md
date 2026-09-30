@@ -104,10 +104,10 @@ Traditional 2D spectrograms flatten energy variations. SIGIL's 3D Surface Waterf
 ```mermaid
 graph TD
     subgraph Client ["Client Layer (Next.js 14 App Router)"]
-        UI[SIGIL Workbench Dashboard]
-        WS_Client[WebSocket SDR Receiver]
-        Plotly3D[WebGL 3D Waterfall Engine]
-        Oscilloscope[I/Q Oscilloscope & Constellation]
+        UI["SIGIL Workbench Dashboard"]
+        WS_Client["WebSocket SDR Receiver"]
+        Plotly3D["WebGL 3D Waterfall Engine"]
+        Oscilloscope["I/Q Oscilloscope & Constellation"]
     end
 
     subgraph API ["Gateway & Services (FastAPI + Starlette)"]
@@ -118,14 +118,14 @@ graph TD
     end
 
     subgraph Core ["DSP Core & Pipeline (signalscope_dsp)"]
-        Conditioning[Signal Conditioning & DC Offset]
-        Burst[Burst Detection & Segmentation]
-        Spectral[Spectral Features & Cyclostationarity]
-        AMC[Higher-Order Cumulant Classifier]
-        SymbolRate[Symbol Rate Line Extraction]
-        Demod[Symbol Center Demodulation]
-        Deinterleave[Matrix & PR Interleaving Unscrambler]
-        FEC[FEC Decoder (Viterbi / RS / LDPC)]
+        Conditioning["Signal Conditioning & DC Offset"]
+        Burst["Burst Detection & Segmentation"]
+        Spectral["Spectral Features & Cyclostationarity"]
+        AMC["Higher-Order Cumulant Classifier"]
+        SymbolRate["Symbol Rate Line Extraction"]
+        Demod["Symbol Center Demodulation"]
+        Deinterleave["Matrix & PR Interleaving Unscrambler"]
+        FEC["FEC Decoder (Viterbi / RS / LDPC)"]
     end
 
     subgraph Storage ["Persistence Layer"]
@@ -136,7 +136,7 @@ graph TD
     UI --> RouterAuth
     UI --> RouterProjects
     UI --> RouterUpload
-    WS_Client <-->|WebSocket /api/stream/ws| RouterStream
+    WS_Client <-->|WebSocket Stream| RouterStream
     Plotly3D <--> UI
     Oscilloscope <--> WS_Client
 
